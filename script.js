@@ -16,23 +16,35 @@ function changeLanguage() {
 async function fetchRandomHadith() {
   try {
     newHadithButton.innerText = 'Loading Hadith...';
-    const apiUrl = currentLanguage === 'english'
-      ? 'https://random-hadith-generator.vercel.app/bukhari/'
-      : 'https://hadeethenc.com/api/v1/urdu';
+    let apiUrl = '';
+
+    if (currentLanguage === 'english') {
+      apiUrl = 'https://random-hadith-generator.vercel.app/bukhari/';
+    } else {
+      const randomHadithNumber = Math.floor(Math.random() * 5100) + 1;
+      apiUrl = `https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/urd-abudawud/${randomHadithNumber}.min.json`;
+    }
 
     const response = await fetch(apiUrl);
     const data = await response.json();
-    hadithElement.innerText = currentLanguage === 'english'
-      ? data.data.hadith_english
-      : data.data.hadith_urdu;
 
-    narratorElement.innerText = data.data.header;
+    let hadithText = '';
+
+    if (currentLanguage === 'english') {
+      hadithText = data.data.hadith_english;
+      narratorElement.innerText = data.data.header;
+    } else {
+      hadithText = data.hadiths[0].text; // Extracting text from the first Hadith object
+    }
+
+    hadithElement.innerText = hadithText;
     newHadithButton.innerText = 'New Hadith';
   } catch (error) {
     console.error('Error fetching Hadith:', error);
     newHadithButton.innerText = 'Failed to load Hadith';
   }
 }
+
 
 soundIcon.addEventListener('click', () => {
   if (speech === null) {
@@ -54,8 +66,3 @@ newHadithButton.addEventListener('click', fetchRandomHadith);
 
 // Add language selection event listener
 languageSelect.addEventListener('change', changeLanguage);
-
-
-
-
-// Additional styles for your existing CSS remain unchanged
